@@ -4,7 +4,7 @@ import { getLogin } from "@/services/authService";
 import { ERROR_MESSAGES, STATUS } from "../../../../../public/const";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-export const authOptions: NextAuthOptions = {
+const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
