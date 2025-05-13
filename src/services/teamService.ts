@@ -290,6 +290,32 @@ const updateTeamRole = async (
     };
   }
 };
+
+const getTeamPlayersAll = async (
+  token: string
+): Promise<any> => {
+  try {
+    const url = `${API_BASE_URL}${API_ENDPOINT.TEAM_PLAYERS}`;
+    const response = await fetch(url, {
+      method: HTTP_METHODS.GET,
+      headers: getDefaultHeaders(token),
+    });
+
+    if (!response.ok) {
+      const { message } = await response.json();
+      throw new Error(message);
+    }
+
+    return { data: await response.json(), error: null };
+  } catch (error: unknown) {
+    return {
+      data: null,
+      error:
+        error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR,
+    };
+  }
+};
+
 export {
   getCategory,
   getMembers,
@@ -301,4 +327,5 @@ export {
   deleteGroupById,
   inviteTeam,
   updateTeamRole,
+  getTeamPlayersAll
 };

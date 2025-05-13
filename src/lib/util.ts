@@ -88,64 +88,64 @@ interface LoadColorCodeProps {
   type: string;
 }
 
-const loadColorCode = ({
-  value,
-  type,
-}: LoadColorCodeProps): React.CSSProperties => {
-  const baseStyle = {
-    fontFamily: "Poppins",
-    fontStyle: "normal",
-    fontWeight: 600,
-    fontSize: "1.18rem",
-    lineHeight: "1.5px",
-    marginRight: "5px",
-  };
+// const loadColorCode = ({
+//   value,
+//   type,
+// }: LoadColorCodeProps): React.CSSProperties => {
+//   const baseStyle = {
+//     fontFamily: "Poppins",
+//     fontStyle: "normal",
+//     fontWeight: 600,
+//     fontSize: "1.18rem",
+//     lineHeight: "1.5px",
+//     marginRight: "5px",
+//   };
 
-  if (value === "--" || type === "bad") {
-    return { ...baseStyle, color: COLORS.gray };
-  }
+//   if (value === "--" || type === "bad") {
+//     return { ...baseStyle, color: COLORS.gray };
+//   }
 
-  if (typeof value === "number") {
-    if (value < 90) {
-      return { ...baseStyle, color: COLORS.red };
-    }
-    if (value <= 94) {
-      return { ...baseStyle, color: COLORS.yellow };
-    }
-    if (value > 94) {
-      return { ...baseStyle, color: COLORS.green };
-    }
-  }
+//   if (typeof value === "number") {
+//     if (value < 90) {
+//       return { ...baseStyle, color: COLORS.red };
+//     }
+//     if (value <= 94) {
+//       return { ...baseStyle, color: COLORS.yellow };
+//     }
+//     if (value > 94) {
+//       return { ...baseStyle, color: COLORS.green };
+//     }
+//   }
 
-  return { ...baseStyle, color: COLORS.gray };
-};
+//   return { ...baseStyle, color: COLORS.gray };
+// };
 
-const getSpo2Value = (
-  fData: Record<string, LastElement[]>,
-  item: User,
-): GetSpo2Value => {
-  let data: GetSpo2Value = {
-    value: "--",
-    type: "bad",
-  };
+// const getSpo2Value = (
+//   fData: Record<string, LastElement[]>,
+//   item: User,
+// ): GetSpo2Value => {
+//   let data: GetSpo2Value = {
+//     value: "--",
+//     type: "bad",
+//   };
 
-  const userData = fData[String(item.user_id)];
+//   const userData = fData[String(item.user_id)];
 
-  if (userData && userData.length > 0) {
-    const lastElement = userData[userData.length - 1];
-    if (lastElement.spo2 && lastElement.signal_quality) {
-      data = { value: lastElement.spo2.toString(), type: "ok" };
-    } else if (
-      !lastElement.signal_quality &&
-      lastElement.spo2 &&
-      lastElement.spo2 > 80
-    ) {
-      data = { value: lastElement.spo2.toString(), type: "bad" };
-    }
-  }
+//   if (userData && userData.length > 0) {
+//     const lastElement = userData[userData.length - 1];
+//     if (lastElement.spo2 && lastElement.signal_quality) {
+//       data = { value: lastElement.spo2.toString(), type: "ok" };
+//     } else if (
+//       !lastElement.signal_quality &&
+//       lastElement.spo2 &&
+//       lastElement.spo2 > 80
+//     ) {
+//       data = { value: lastElement.spo2.toString(), type: "bad" };
+//     }
+//   }
 
-  return data;
-};
+//   return data;
+// };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const getLastActiveTime = (fData: any, item: any) => {
@@ -168,6 +168,80 @@ const getLastActiveTime = (fData: any, item: any) => {
     return "--";
   }
 };
+const loadColorCode = (data: { value: any; type: any; }) => {
+  let spo2 = data.value;
+  let signal_quality = data.type;
+  
+  //         If the spo2 < 90 #E51414
+  //  If the spo2 between 90 and 94 #F7B500
+  //  If the spo2 greater than 94 #56E4D7
+  // If the device signals are bad, it’s #808080
+  if (!spo2 || spo2 === "--" || signal_quality ==="bad") {
+      return {
+          color: "#808080"
+      }
+  }
+
+  if (spo2 < 90) {
+      return ({
+          color: "#E51414"
+      })
+  } else if (spo2 <= 94) {
+      return ({
+          color: "#F7B500"
+      })
+  } else if (spo2 > 94) {
+
+      return ({
+          color: "#56E4D7"
+      })
+  } else {
+      return ({
+          color: "#808080"
+      })
+  }
+}
+
+const getSpo2Value = (fData: Record<string, any[]>,item: { user_id: any; })=>{
+  let data = {
+      value:'',
+      type:''
+  }
+  
+  if(fData[String(item?.user_id)]){
+      
+
+      let lastElement = fData[String(item?.user_id)][
+                  fData[String(item?.user_id)]?.length - 1
+                ];
+                if(lastElement?.spo2 && lastElement?.signal_quality){
+                  // return lastElement.spo2;
+                  data.value = lastElement.spo2;
+                  data.type = 'ok'
+                }else if (!lastElement?.signal_quality && lastElement?.spo2 && lastElement?.spo2 > 80 ){
+                  // return lastElement.spo2;
+                  data.value = lastElement.spo2;
+                  data.type = 'bad'
+                }
+                else{
+                  data.value = '--';
+                  data.type = 'bad'
+                }
+                return data;
+  }else{
+      return {
+          value:'--',
+          type:'bad'
+      }
+  }
+//     return fData[String(item?.user_id)][
+//         fData[String(item?.user_id)]?.length - 1
+//       ]?.spo2
+//         ? fData[String(item?.user_id)][
+//             fData[String(item?.user_id)]?.length - 1
+//           ]?.spo2
+//         : "-"
+}
 
 export {
   decodeJWT,

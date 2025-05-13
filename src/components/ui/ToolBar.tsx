@@ -71,6 +71,8 @@ export default function Toolbar({
   isNormalTabView,
   searchPlayers,
   setSearchValue,
+  accessUser,
+  fData
 }: ToolBarProps) {
   /* eslint-disable-next-line */
   const onSearch = (query: string, team: string) => {
@@ -114,6 +116,8 @@ export default function Toolbar({
                   <ActionButtons
                     onDownload={onDownload}
                     onCompare={onCompare}
+                    accessUser={accessUser}
+                    fData={fData}
                   />
                 </Grid>
               </Box>
@@ -152,7 +156,7 @@ export default function Toolbar({
             }}
           >
             <ThemeProvider theme={customTheme}>
-              <ActionButtons onDownload={onDownload} onCompare={onCompare} />
+              <ActionButtons onDownload={onDownload} onCompare={onCompare} accessUser={accessUser} fData={fData}/>
             </ThemeProvider>
           </Grid>
         </Grid>

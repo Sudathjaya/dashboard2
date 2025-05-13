@@ -9,8 +9,9 @@ import MainTable from "@/components/ui/MainTable";
 import MainCalendar from "@/components/ui/MainCalendar";
 import { getDashboardDetails, getJournals } from "@/services/dashboardService";
 import { Theme, useMediaQuery } from "@mui/material";
-import { DashboardProps } from "@/types/interfaces";
+import { AccessUser, DashboardProps } from "@/types/interfaces";
 import Toolbar from "@/components/ui/ToolBar";
+import JournalAddNote from "../journal/add-journal-note";
 
 const styles = {
   container: {
@@ -56,10 +57,10 @@ const Dashboard = ({ userProfile }: DashboardProps) => {
   const [open, setOpen] = useState<boolean>(false);
   const [note, setNote] = useState<Record<string, any>>({}); // Updated type
   const [date, setDate] = useState<Date>(new Date());
-  const [noteDetails, setNoteDetails] = useState<any[]>([]);
+  const [noteDetails, setNoteDetails] = useState<any>([]);
   const [readJournal, setReadJournal] = useState<boolean>(false);
   const [groupData, setGroupData] = useState<Record<string, any>[]>([]); // Updated type
-
+  const [accessUser, setAccessUser] = useState<AccessUser[]>([]);
   const formName = "Pick Team";
 
   useEffect(() => {
@@ -114,7 +115,6 @@ const Dashboard = ({ userProfile }: DashboardProps) => {
           setUsers(users);
           setSelectedDays([]);
           setSearchValue("");
-          setGroup("");
         }
       }
     } catch (error) {
@@ -220,6 +220,8 @@ const Dashboard = ({ userProfile }: DashboardProps) => {
         isNormalTabView={isNormalTabView}
         searchPlayers={searchPlayers}
         setSearchValue={setSearchValue}
+        accessUser={accessUser}
+        fData={users}
       />
       <Grid container spacing={1} sx={styles.container}>
         <Grid size={isTabView ? styles.mainTable2 : styles.mainTable}>
@@ -235,6 +237,7 @@ const Dashboard = ({ userProfile }: DashboardProps) => {
             pageSize={pageSize}
             group={group}
             getJournalData={getJournalData}
+            setAccessUser={setAccessUser}
           />
         </Grid>
         <Grid
@@ -268,6 +271,15 @@ const Dashboard = ({ userProfile }: DashboardProps) => {
               isTabView={isTabView}
             />
           </Grid>
+          <JournalAddNote
+            getJournalData={getJournalData}
+            selectedDate={date}
+            noteDetails={noteDetails}
+            readJournal={readJournal}
+            setReadJournal={setReadJournal}
+            setOpen={setOpen}
+            open={open}
+          />
         </Grid>
       </Grid>
     </>

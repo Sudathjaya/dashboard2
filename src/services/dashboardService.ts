@@ -100,4 +100,60 @@ const getTeamData = async (
   }
 };
 
-export { getDashboardDetails, getTeamData, getJournals };
+const deleteJournal = async (
+  token: string,
+  id: string
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+): Promise<ApiResponse<any>> => {
+  try {
+    const url = `${API_BASE_URL}${API_ENDPOINT.JOURNAL}/${id}`;
+    const response = await fetch(url, {
+      method: HTTP_METHODS.DELETE,
+      headers: getDefaultHeaders(token)
+    });
+
+    if (!response.ok) {
+      const { message } = await response.json();
+      throw new Error(message);
+    }
+
+    const responseData = await response.json();
+    return { data: responseData, error: null };
+  } catch (error: unknown) {
+    return {
+      data: null,
+      error:
+        error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR,
+    };
+  }
+};
+
+const addJournal = async (
+  token: string,
+  payload: Record<string, unknown>,
+  /* eslint-disable-next-line @typescript-eslint/no-explicit-any */
+): Promise<ApiResponse<any>> => {
+  try {
+    const url = `${API_BASE_URL}${API_ENDPOINT.ADD_JOURNAL}`;
+    const response = await fetch(url, {
+      method: HTTP_METHODS.POST,
+      headers: getDefaultHeaders(token),
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      const { message } = await response.json();
+      throw new Error(message);
+    }
+
+    const responseData = await response.json();
+    return { data: responseData, error: null };
+  } catch (error: unknown) {
+    return {
+      data: null,
+      error:
+        error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR,
+    };
+  }
+};
+export { getDashboardDetails, getTeamData, getJournals , deleteJournal, addJournal};

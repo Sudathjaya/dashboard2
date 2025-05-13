@@ -114,4 +114,53 @@ const deleteUserById = async (
   }
 };
 
-export { getProfile, userInvite, getTeamAdmins, deleteUserById };
+const getIndividualUserAll = async (token: string): Promise<any> => {
+  const url = `${API_BASE_URL}${API_ENDPOINT.PLAYER_ALL}`;
+
+  try {
+    const response = await fetch(url, {
+      method: HTTP_METHODS.GET,
+      headers: getDefaultHeaders(token),
+    });
+
+    if (!response.ok) {
+      const { message } = await response.json();
+      throw new Error(message);
+    }
+
+    return { data: await response.json(), error: null };
+  } catch (error: unknown) {
+    return {
+      data: null,
+      error:
+        error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR,
+    };
+  }
+};
+
+const getTeamDashboard= async (token: string): Promise<any> => {
+  const url = `${API_BASE_URL}${API_ENDPOINT.TEAM_DASHBOARD}/?page=1&page_size=50&order=asc`;
+
+  try {
+    const response = await fetch(url, {
+      method: HTTP_METHODS.GET,
+      headers: getDefaultHeaders(token),
+    });
+
+    if (!response.ok) {
+      const { message } = await response.json();
+      throw new Error(message);
+    }
+
+    return { data: await response.json(), error: null };
+  } catch (error: unknown) {
+    return {
+      data: null,
+      error:
+        error instanceof Error ? error.message : ERROR_MESSAGES.UNKNOWN_ERROR,
+    };
+  }
+};
+
+
+export { getProfile, userInvite, getTeamAdmins, deleteUserById, getIndividualUserAll, getTeamDashboard };

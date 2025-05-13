@@ -1,8 +1,11 @@
 import { Box, Button } from "@mui/material";
+import CustomizedDialog from "../customModals/CustomizedDialog";
 
 interface ActionButtonsProps {
   onDownload: () => void;
   onCompare: () => void;
+  accessUser: any,
+  fData: any
 }
 
 const styles = {
@@ -51,15 +54,15 @@ const styles = {
 export default function ActionButtons({
   onDownload,
   onCompare,
+  accessUser,
+  fData
 }: ActionButtonsProps) {
   return (
     <Box sx={styles.container}>
       <Button onClick={onDownload} sx={styles.downloadButton}>
         Download Report
       </Button>
-      <Button variant="contained" onClick={onCompare} sx={styles.compareButton}>
-        Compare
-      </Button>
+      <CustomizedDialog userValue={accessUser} fData={fData} />
     </Box>
   );
 }

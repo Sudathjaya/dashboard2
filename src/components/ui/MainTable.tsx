@@ -1,6 +1,6 @@
 /* eslint-disable */
 import { ChangeEvent, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from 'next/navigation';
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import moment from "moment";
@@ -182,13 +182,14 @@ export default function MainTable({
   pageSize,
   group,
   getJournalData,
+  setAccessUser
 }: MainTableProps) {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [fromDate, setFromDate] = useState("");
   const [filedOrder, setFiledOrder] = useState("asc");
   const [vitals, setVitals] = useState<Record<string, any[]>>({});
-  const [accessUser, setAccessUser] = useState<AccessUser | null>(null);
+  const [selectedUsers, setSelectedUsers] = useState<AccessUser[]>([]);
   const dateNow = new Date();
 
   useEffect(() => {
@@ -199,6 +200,7 @@ export default function MainTable({
 
   useEffect(() => {
     getJournalData();
+    loadData("asc", "first_name", pageNumber, pageSize);
     // eslint-disable-next-line
   }, [group]);
 
@@ -213,11 +215,21 @@ export default function MainTable({
 
   const handleCheckboxChange = (
     event: ChangeEvent<HTMLInputElement>,
-    row: any,
+    row: AccessUser
   ) => {
-    setAccessUser(event.target.checked ? row : null);
+    let newSelectedUsers: AccessUser[] = [];
+  
+    if (event.target.checked) {
+      newSelectedUsers = [...selectedUsers, row];
+    } else {
+      newSelectedUsers = selectedUsers.filter((user) => user.id !== row.id);
+    }
+  
+    setSelectedUsers(newSelectedUsers);
+    setAccessUser(newSelectedUsers);
   };
-
+  
+  
   const handlePageChange = (page: number, page_size: number) => {
     if (pageNumber !== page || page_size !== pageSize) {
       setPageNumber(page);
@@ -225,8 +237,16 @@ export default function MainTable({
     }
   };
 
-  const viewUser = (id: string) => {
-    router.push(`${id}`);
+  const viewUser = (item: { user_id: number; first_name?: string; last_name?: string }) => {
+    const { user_id, first_name = '', last_name = '' } = item;
+  
+    const params = new URLSearchParams({
+      user_id: user_id.toString(),
+      first_name,
+      last_name,
+    });
+  
+    router.push(`/individualView?${params.toString()}`);
   };
 
   const changeOrder = (filed: string) => {
@@ -377,7 +397,7 @@ export default function MainTable({
         <Box sx={styles.container} key={item.member_id}>
           <Box
             sx={
-              accessUser?.member_id === item.member_id
+              selectedUsers.some((user) => user.member_id === item.member_id)
                 ? styles.tBodyMark
                 : styles.tBody
             }
@@ -385,7 +405,7 @@ export default function MainTable({
             <Box sx={styles.title6}>
               <Box sx={styles.item1}>
                 <Checkbox
-                  checked={accessUser?.id === item.id}
+                  checked={selectedUsers.some((user) => user.id === item.id)}
                   onChange={(e) => handleCheckboxChange(e, item)}
                   sx={{
                     color: "#23AFC4",
@@ -407,7 +427,7 @@ export default function MainTable({
               <Box sx={styles.item3} onClick={() => viewUser(item)}>
                 <Typography
                   sx={
-                    accessUser?.member_id === item.member_id
+                    selectedUsers.some((user) => user.member_id === item.member_id)
                       ? styles.tdTextMark
                       : styles.tdText
                   }

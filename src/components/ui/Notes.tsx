@@ -107,7 +107,7 @@ export default function Notes({
   isTabView,
 }: NotesProps) {
   const handleReadNote = (noteDetails: Note) => {
-    setNoteDetails([noteDetails]);
+    setNoteDetails(noteDetails);
     setReadJournal(true);
     setOpen(true);
   };

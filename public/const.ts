@@ -24,7 +24,10 @@ export const API_ENDPOINT = {
   USER_INVITE: '/user/invite',
   TEAM_ADMINS: '/team/admins',
   TEAM_INVITE: '/team/invite',
-  TEAM_CHANGE_ROLE: "/team/change_role"
+  TEAM_CHANGE_ROLE: "/team/change_role",
+  PLAYER_ALL: '/v1/player/all',
+  DASHBOARD_PLAYERS_VITALS:'/v1/dashboard/player-vitals',
+  ADD_JOURNAL: '/journal/add'
 };
 
 export const ROUTE_ENDPOINT = {

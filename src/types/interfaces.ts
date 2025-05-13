@@ -119,6 +119,7 @@ export interface MainTableProps {
   setPageSize: Dispatch<SetStateAction<number>>;
   group: string;
   getJournalData: () => void;
+  setAccessUser: ([]) => void;
 }
 
 export interface TableHeaderProps {
@@ -165,7 +166,7 @@ export interface NotesProps {
   setOpen: Dispatch<SetStateAction<boolean>>;
   note: Record<string, Note[]>;
   date: Date;
-  setNoteDetails: Dispatch<SetStateAction<Note[]>>;
+  setNoteDetails: Dispatch<SetStateAction<Note>>;
   setReadJournal: Dispatch<SetStateAction<boolean>>;
   getJournalData: () => Promise<void>;
   isTabView: boolean;
@@ -229,6 +230,8 @@ export interface ToolBarProps {
   isNormalTabView: boolean;
   searchPlayers: (order: string, filed: string, query: string) => void;
   setSearchValue: Dispatch<SetStateAction<string>>;
+  accessUser: any;
+  fData: any
 }
 
 export interface FormControlComponent2 {
