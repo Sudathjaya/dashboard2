@@ -68,6 +68,13 @@ const Dashboard = ({ userProfile }: DashboardProps) => {
     // eslint-disable-next-line
   }, [group, userProfile]);
 
+  useEffect(() => {
+    if (status === TEXTS.AUTHENTICATED && session?.user?.accessToken) {
+      loadData("asc", "first_name", pageNumber, pageSize);
+    }
+    // eslint-disable-next-line
+  }, []);
+
   const loadData = async (
     order: string,
     filed: string,

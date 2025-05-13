@@ -20,6 +20,7 @@ import {
   DASHBOARD,
   DOT,
   MENU_ITEMS,
+  ROUTE_ENDPOINT,
   USER_MENU_ITEMS,
 } from "../../../public/const";
 import { DesktopView, MobileView, TabletView, User } from "./AppBarComponents";
@@ -33,6 +34,9 @@ import CoachManagementModal from "../customModals/coachManagement/coachManagemen
 import SubscriptionMainModal from "../customModals/subscription/subscriptionmain";
 import SupportModal from "../customModals/support/supportModal";
 import AccountModal from "../customModals/account/accountModal";
+import LogOutModal from "@/app/settings/logOutModal";
+import { signOut } from "next-auth/react";
+import { useAuth } from "@/context/AuthContext";
 
 const styles = {
   appBar: { backgroundColor: "#313131", position: "static" },
@@ -158,11 +162,19 @@ const TopBar = ({ userProfile }: TopBarProps) => {
     useState(false);
   const [openedPassword, setOpenedPassword] = useState(false);
   const [openedAuthentication, setOpenAuthentication] = useState(false);
+  const [isOpenLogoutModal, setOpenlogoutModal] = useState(false);
+  const { logout } = useAuth();
   const router = useRouter();
 
   const handleClose = () => {
     setAnchorEl(null);
     setDrawerOpen(false);
+  };
+
+  const handleLogout = async () => {
+    logout();
+    await signOut({ redirect: false });
+    router.push(ROUTE_ENDPOINT.LOGIN)
   };
 
   const handleMenuItem = (type: string) => {
@@ -174,6 +186,8 @@ const TopBar = ({ userProfile }: TopBarProps) => {
       setOpenedSupport(!openedSupport);
     } else if (type === "Account") {
       setOpenedAccount(!openedAccount);
+    } else if (type === "Logout") {
+      setOpenlogoutModal(!isOpenLogoutModal);
     }
   };
 
@@ -241,6 +255,11 @@ const TopBar = ({ userProfile }: TopBarProps) => {
         open={openedAccount}
         setOpenedPassword={setOpenedPassword}
         setOpenAuthentication={setOpenAuthentication}
+      />
+      <LogOutModal
+        open={isOpenLogoutModal}
+        setOpen={setOpenlogoutModal}
+        handleLogout={handleLogout}
       />
     </>
   );

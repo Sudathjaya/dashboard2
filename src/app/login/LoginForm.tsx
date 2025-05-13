@@ -62,7 +62,10 @@ const styles = {
     alignItems: "center",
   },
   cusTextField: {
-    marginBottom: "1.8rem",
+    marginBottom: "0.8rem",
+    "& .MuiOutlinedInput-root": {
+      height: '46px'
+    },
   },
   cusAlert: {
     marginBottom: "20px",
@@ -224,6 +227,7 @@ const LoginForm = () => {
                   </InputAdornment>
                 ),
               }}
+              sx={styles.cusTextField}
             />
           )}
         />
