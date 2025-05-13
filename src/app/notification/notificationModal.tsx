@@ -1,5 +1,12 @@
-import { useState, useEffect } from "react";
-import { Popover, Typography, Box, Avatar, Badge } from "@mui/material";
+import { useState, useEffect, MouseEvent } from "react";
+import {
+  Popover,
+  Typography,
+  Box,
+  Avatar,
+  Badge,
+  IconButton,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import moment from "moment";
 import RealTimeNotificationModal from "./realTimeNotification";
@@ -13,100 +20,100 @@ import { useSession } from "next-auth/react";
 import Image from "next/image";
 import Grid from "@mui/material/Grid2";
 import { useAuth } from "@/context/AuthContext";
-import { NotificationModalProps } from "@/types/interfaces";
+interface NotificationModalProps {
+  setOpenAuthentication: (val: boolean) => void;
+  setOpenedAccount: (val: boolean) => void;
+}
+
+interface NotificationItem {
+  id: string;
+  message: string;
+  time: string;
+  data?: {
+    request_id?: string;
+    status?: string;
+  };
+}
 
 const styles = {
   boxCSS: {
     width: "25.5rem",
     overflowY: "auto",
+    overflowX: "hidden",
   },
   boxCSS2: {
     width: "25.5rem",
     border: "2px solid #0F9BB0",
     borderStyle: "none none double double",
+    overflowX: "hidden",
   },
   boxCSSUnRead: {
     width: "25.5rem",
     border: "2px solid #0F9BB0",
     backgroundColor: "#ECF9F7",
     borderStyle: "none none double double",
+    overflowX: "hidden",
   },
   boxCSSRead: {
     width: "25.5rem",
     border: "2px solid #0F9BB0",
     backgroundColor: "#FFFFFF",
     borderStyle: "none none double double",
-  },
-  boxCSSRealTime: {
-    width: "25.5rem",
-    border: "2px solid #0F9BB0",
-    backgroundColor: "#FFFFFF",
+    overflowX: "hidden",
   },
   notificationHeader: {
     fontFamily: "'Poppins', sans-serif",
-    fontStyle: "normal",
     fontWeight: 600,
-    color: "#000000",
     fontSize: "15px",
-    lineHeight: "0px",
     p: 3,
   },
   notificationDate: {
     fontFamily: "'Poppins', sans-serif",
-    fontStyle: "normal",
     fontWeight: 400,
-    color: "#000000",
     fontSize: "12px",
-    lineHeight: "0px",
-    marginTop: "0.3rem",
+    mt: "0.3rem",
     p: 1,
   },
   notificationMessage: {
     fontFamily: "'Poppins', sans-serif",
-    fontStyle: "normal",
     fontWeight: 400,
-    color: "#000000",
     fontSize: "12px",
-    lineHeight: "0px",
   },
 };
 
 const NotificationModal = ({
   setOpenAuthentication,
   setOpenedAccount,
-}: NotificationModalProps) => {
+}: any) => {
   const { data: session, status } = useSession();
   const [open, setOpen] = useState(false);
   const [dot, setDot] = useState(false);
-  const [notificationData, setNotificationData] = useState<any>([]);
-  const [matchNotificationData, setMatchNotificationData] = useState([]);
-  const [newNotificationData, setNewNotificationData] = useState([]);
-  const [readNotificationData, setReadNotificationData] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
+  const [notificationData, setNotificationData] = useState<NotificationItem[]>([]);
+  const [matchNotificationData, setMatchNotificationData] = useState<NotificationItem[]>([]);
+  const [newNotificationData, setNewNotificationData] = useState<NotificationItem[]>([]);
+  const [readNotificationData, setReadNotificationData] = useState<NotificationItem[]>([]);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const { user } = useAuth();
-  const profilePic = user?.avatar_url;
-  const role = user?.role;
+  const profilePic = user?.avatar_url ?? "";
+  const role = user?.role ?? "";
 
-  const handleClick = (event: any) => {
-    setAnchorEl(event?.currentTarget ? event?.currentTarget : anchorEl);
+  const handleClick = (event: MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
     setOpen(true);
-    if (matchNotificationData?.length !== notificationData?.length) {
+
+    if (matchNotificationData.length !== notificationData.length) {
       setDot(false);
       setMatchNotificationData(notificationData);
       setNewNotificationData(notificationData);
     }
-    const newNotifi = notificationData.filter(function (o1: any) {
-      // filter out (!) items in result2
-      return !matchNotificationData.some(function (o2: any) {
-        return o1.id === o2.id; // assumes unique id
-      });
-    });
-    const read = notificationData.filter(function (o1: any) {
-      // filter out (!) items in result2
-      return matchNotificationData.some(function (o2: any) {
-        return o1.id === o2.id; // assumes unique id
-      });
-    });
+
+    const newNotifi = notificationData.filter(
+      (o1) => !matchNotificationData.some((o2) => o1.id === o2.id)
+    );
+    const read = notificationData.filter((o1) =>
+      matchNotificationData.some((o2) => o1.id === o2.id)
+    );
+
     setNewNotificationData(newNotifi);
     setReadNotificationData(read);
   };
@@ -117,313 +124,185 @@ const NotificationModal = ({
 
   useEffect(() => {
     loadNotificationData();
-    // eslint-disable-next-line
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadNotificationData = async () => {
     try {
       if (status === TEXTS.AUTHENTICATED && session?.user?.accessToken) {
-        const { data } = await getNotificationsList(session?.user?.accessToken);
-        if (matchNotificationData?.length !== data.data?.length) {
+        const { data } = await getNotificationsList(session.user.accessToken);
+        if (matchNotificationData.length !== data.data?.length) {
           setDot(true);
         }
         setNotificationData(data.data);
       }
-    } catch (error: any) {
-      console.log(error);
+    } catch (error) {
+      console.error(error);
     }
   };
 
-  const handleVerify = async (e: any) => {
+  const handleVerify = async (item: NotificationItem) => {
     try {
       if (status === TEXTS.AUTHENTICATED && session?.user?.accessToken) {
         await getNotificationsMarkActionComplete(
-          session?.user?.accessToken,
-          e?.data?.request_id,
+          session.user.accessToken,
+          item.data?.request_id
         );
-        await getNotificationsMarkAsSeen(session?.user?.accessToken, e.id);
+        await getNotificationsMarkAsSeen(session.user.accessToken, item.id);
         setOpenAuthentication(true);
       }
-    } catch (error: any) {
-      console.log(error);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setOpen(false);
     }
-    setOpen(false);
   };
 
-  const handleReview = async (e: any) => {
+  const handleReview = async (item: NotificationItem) => {
     try {
       if (status === TEXTS.AUTHENTICATED && session?.user?.accessToken) {
-        await getNotificationsMarkAsSeen(session?.user?.accessToken, e.id);
+        await getNotificationsMarkAsSeen(session.user.accessToken, item.id);
         setOpenedAccount(true);
         loadNotificationData();
       }
-    } catch (error: any) {
-      console.log(error);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setOpen(false);
     }
-    setOpen(false);
   };
 
-  const handleMarkAsSeen = async (e: any) => {
+  const handleMarkAsSeen = async (item: NotificationItem) => {
     try {
       if (status === TEXTS.AUTHENTICATED && session?.user?.accessToken) {
-        await getNotificationsMarkAsSeen(session?.user?.accessToken, e.id);
-        const { data } = await getNotificationsList(session?.user?.accessToken);
-        setOpen(false);
+        await getNotificationsMarkAsSeen(session.user.accessToken, item.id);
+        const { data } = await getNotificationsList(session.user.accessToken);
         setNotificationData(data.data);
       }
-    } catch (error: any) {
-      console.log(error);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setOpen(false);
     }
   };
 
   const id = open ? "simple-popover" : undefined;
 
   return (
-    <div>
-      <Box>
-        {dot ? (
-          <Badge
-            sx={{
-              "& .MuiBadge-badge": {
-                backgroundColor: "#56E4D7",
-              },
-            }}
-            variant="dot"
-          >
-            <Image
-              width={15}
-              height={16}
-              alt="notification"
-              src="/images/svg/notification.svg"
-              onClick={handleClick}
-              style={{ marginLeft: "1.5rem", margin: 0, cursor: "pointer" }}
-            />
-          </Badge>
-        ) : (
-          <Badge>
-            <Image
-              width={15}
-              height={16}
-              alt="notification"
-              src="/images/svg/notification.svg"
-              onClick={handleClick}
-              style={{ marginLeft: "1.5rem", margin: 0, cursor: "pointer" }}
-            />
-          </Badge>
-        )}
-      </Box>
+    <Box>
+      <Badge
+        variant="dot"
+        invisible={!dot}
+        sx={{
+          "& .MuiBadge-badge": {
+            backgroundColor: "#56E4D7",
+          },
+        }}
+      >
+        <Image
+          width={15}
+          height={16}
+          alt="notification"
+          src="/images/svg/notification.svg"
+          onClick={handleClick}
+          style={{ margin: 0, cursor: "pointer" }}
+        />
+      </Badge>
+
       <Popover
         id={id}
         open={open}
         anchorEl={anchorEl}
         onClose={handleClose}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
-        }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
       >
         <Box sx={styles.boxCSS}>
           <Box sx={styles.boxCSS2}>
             <Typography sx={styles.notificationHeader}>
-              Notification: {newNotificationData?.length} new
+              Notification: {newNotificationData.length} new
             </Typography>
           </Box>
-          {newNotificationData.map((item: any, idx: any) => (
-            <Box sx={styles.boxCSSUnRead} key={idx}>
-              <Grid container>
-                <Grid size={{ md: 10, xs: 10, sm: 10 }}>
-                  <Grid size={{ md: 12, xs: 12, sm: 12 }}>
-                    <Typography
-                      sx={styles.notificationDate}
-                    >{`${moment(item?.time).format("LT")}  ${moment(item?.time).format("ll")}`}</Typography>
-                  </Grid>
-                  <Grid size={{ md: 12, xs: 12, sm: 12 }}>
-                    <Grid container>
-                      <Grid
-                        size={{ md: 2, xs: 2, sm: 2 }}
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Avatar
-                          alt="Remy Sharp"
-                          src={profilePic}
-                          sx={{ width: 35, height: 35 }}
-                        />
-                      </Grid>
-                      <Grid size={{ md: 10, xs: 10, sm: 10 }}>
-                        {role === "COACH" ? (
+
+          {[...newNotificationData, ...readNotificationData].map((item, idx) => {
+            const isNew = newNotificationData.includes(item);
+            return (
+              <Box
+                key={item.id || idx}
+                sx={isNew ? styles.boxCSSUnRead : styles.boxCSSRead}
+              >
+                <Grid container>
+                  <Grid size={{ md: 10, xs: 10, sm: 10 }}>
+                    <Grid size={{ md: 12, xs: 12, sm: 12 }}>
+                      <Typography sx={styles.notificationDate}>
+                        {`${moment(item.time).format("LT")} ${moment(item.time).format("ll")}`}
+                      </Typography>
+                    </Grid>
+                    <Grid size={{ md: 12, xs: 12, sm: 12 }}>
+                      <Grid container>
+                        <Grid
+                          size={{ md: 2, xs: 2, sm: 2 }}
+                          sx={{
+                            display: "flex",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <Avatar src={profilePic} sx={{ width: 35, height: 35 }} />
+                        </Grid>
+                        <Grid size={{ md: 10, xs: 10, sm: 10 }}>
                           <Typography
                             sx={{
                               p: 2,
                               fontFamily: "Poppins",
-                              fontStyle: "normal",
-                              fontWeight: "400",
+                              fontWeight: 400,
                               fontSize: "13.5px",
                               color: "#000000",
                             }}
                           >
-                            {item?.message}{" "}
+                            {item.message}{" "}
                             <span
                               style={{
                                 color: "#0F9BB0",
-                                textDecorationLine: "underline",
+                                textDecoration: "underline",
                                 cursor: "pointer",
                               }}
-                              onClick={() => handleVerify(item)}
+                              onClick={() =>
+                                role === "COACH"
+                                  ? handleVerify(item)
+                                  : handleReview(item)
+                              }
                             >
-                              {item?.data?.status !== "DECLINED"
-                                ? "Verify Now"
-                                : null}
+                              {role === "COACH"
+                                ? item.data?.status !== "DECLINED"
+                                  ? "Verify Now"
+                                  : null
+                                : "Review"}
                             </span>
                           </Typography>
-                        ) : (
-                          <Typography
-                            sx={{
-                              p: 2,
-                              fontFamily: "Poppins",
-                              fontStyle: "normal",
-                              fontWeight: "400",
-                              fontSize: "13.5px",
-                              color: "#000000",
-                            }}
-                          >
-                            {item?.message}{" "}
-                            <span
-                              style={{
-                                color: "#0F9BB0",
-                                textDecorationLine: "underline",
-                                cursor: "pointer",
-                              }}
-                              onClick={() => handleReview(item)}
-                            >
-                              Review
-                            </span>
-                          </Typography>
-                        )}
+                        </Grid>
                       </Grid>
                     </Grid>
                   </Grid>
-                </Grid>
-                <Grid
-                  size={{ md: 2, xs: 2, sm: 2 }}
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <CloseIcon
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handleMarkAsSeen(item)}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-          ))}
-          {readNotificationData.map((item: any, idx: any) => (
-            <Box sx={styles.boxCSSRead} key={idx}>
-              <Grid container>
-                <Grid size={{ md: 10, xs: 10, sm: 10 }}>
-                  <Grid size={{ md: 12, xs: 12, sm: 12 }}>
-                    <Typography
-                      sx={styles.notificationDate}
-                    >{`${moment(item?.time).format("LT")}  ${moment(item?.time).format("ll")}`}</Typography>
-                  </Grid>
-                  <Grid size={{ md: 12, xs: 12, sm: 12 }}>
-                    <Grid container>
-                      <Grid
-                        size={{ md: 2, xs: 2, sm: 2 }}
-                        style={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        <Avatar
-                          alt="Remy Sharp"
-                          src={profilePic}
-                          sx={{ width: 35, height: 35 }}
-                        />
-                      </Grid>
-                      <Grid size={{ md: 10, xs: 10, sm: 10 }}>
-                        {role === "COACH" ? (
-                          <Typography
-                            sx={{
-                              p: 2,
-                              fontFamily: "Poppins",
-                              fontStyle: "normal",
-                              fontWeight: "400",
-                              fontSize: "13.5px",
-                              color: "#000000",
-                            }}
-                          >
-                            {item?.message}{" "}
-                            <span
-                              style={{
-                                color: "#0F9BB0",
-                                textDecorationLine: "underline",
-                                cursor: "pointer",
-                              }}
-                              onClick={() => handleVerify(item)}
-                            >
-                              {item?.data?.status !== "DECLINED"
-                                ? "Verify Now"
-                                : null}
-                            </span>
-                          </Typography>
-                        ) : (
-                          <Typography
-                            sx={{
-                              p: 2,
-                              fontFamily: "Poppins",
-                              fontStyle: "normal",
-                              fontWeight: "400",
-                              fontSize: "13.5px",
-                              color: "#000000",
-                            }}
-                          >
-                            {item?.message}{" "}
-                            <span
-                              style={{
-                                color: "#0F9BB0",
-                                textDecorationLine: "underline",
-                                cursor: "pointer",
-                              }}
-                              onClick={() => handleReview(item)}
-                            >
-                              Review
-                            </span>
-                          </Typography>
-                        )}
-                      </Grid>
-                    </Grid>
+                  <Grid
+                    size={{ md: 2, xs: 2, sm: 2 }}
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <IconButton onClick={() => handleMarkAsSeen(item)}>
+                      <CloseIcon />
+                    </IconButton>
                   </Grid>
                 </Grid>
-                <Grid
-                  size={{ md: 2, xs: 2, sm: 2 }}
-                  style={{
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <CloseIcon
-                    style={{ cursor: "pointer" }}
-                    onClick={() => handleMarkAsSeen(item)}
-                  />
-                </Grid>
-              </Grid>
-            </Box>
-          ))}
+              </Box>
+            );
+          })}
         </Box>
       </Popover>
+
       <RealTimeNotificationModal
         setOpenAuthentication={setOpenAuthentication}
         setOpenedAccount={setOpenedAccount}
@@ -431,7 +310,7 @@ const NotificationModal = ({
         setDot={setDot}
         notificationData={notificationData}
       />
-    </div>
+    </Box>
   );
 };
 

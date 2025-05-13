@@ -53,7 +53,7 @@ const getNotificationsMarkAsSeen = async (
 
 const getNotificationsMarkActionComplete = async (
   token: string,
-  id: string,
+  id: any,
 ): Promise<any> => {
   try {
     const url = `${API_BASE_URL}${API_ENDPOINT.NOTIFICATIONS_ACTION_COMPLETE}/${id}`;
