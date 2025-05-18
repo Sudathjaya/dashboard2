@@ -153,12 +153,14 @@ const Dashboard = ({ userProfile }: DashboardProps) => {
         month,
         { group_id: group },
       );
-      setNote(res.data.data);
-      let getDays = Array.isArray(res.data.data)
-        ? res.data.data.map((element: { prop: any }) => element.prop)
-        : [];
-
-      setSelectedDays(getDays);
+      if(res.data.data){
+        setNote(res.data.data);
+        let getDays = Array.isArray(res.data.data)
+          ? res.data.data.map((element: { prop: any }) => element.prop)
+          : [];
+  
+        setSelectedDays(getDays);
+      }
     }
   };
 

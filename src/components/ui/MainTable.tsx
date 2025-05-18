@@ -13,6 +13,7 @@ import { getTeamData } from "@/services/dashboardService";
 import { getLastActiveTime, getSpo2Value, loadColorCode } from "@/lib/util";
 import { AccessUser, MainTableProps } from "@/types/interfaces";
 import { TableHeader } from "./mainTable/TableHeader";
+import { useAuth } from "@/context/AuthContext";
 
 const styles = {
   Checkbox: {
@@ -171,6 +172,13 @@ const styles = {
   },
 };
 
+type UserItem = {
+  user_id: number;
+  first_name?: string;
+  last_name?: string;
+  avatar_url?: string;
+};
+
 export default function MainTable({
   loadData,
   members,
@@ -191,6 +199,7 @@ export default function MainTable({
   const [vitals, setVitals] = useState<Record<string, any[]>>({});
   const [selectedUsers, setSelectedUsers] = useState<AccessUser[]>([]);
   const dateNow = new Date();
+  const { setSelectedUser } = useAuth();
 
   useEffect(() => {
     if (status === TEXTS.AUTHENTICATED && session?.user?.accessToken) {
@@ -237,16 +246,9 @@ export default function MainTable({
     }
   };
 
-  const viewUser = (item: { user_id: number; first_name?: string; last_name?: string }) => {
-    const { user_id, first_name = '', last_name = '' } = item;
-  
-    const params = new URLSearchParams({
-      user_id: user_id.toString(),
-      first_name,
-      last_name,
-    });
-  
-    router.push(`/individualView?${params.toString()}`);
+  const viewUser = ({ user_id, first_name = '', last_name = '', avatar_url = '' }: UserItem) => {
+    setSelectedUser({ user_id, first_name, last_name, avatar_url });
+    router.push('/individualView');
   };
 
   const changeOrder = (filed: string) => {
